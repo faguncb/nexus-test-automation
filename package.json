@@ -1,0 +1,24 @@
+{
+  "name": "nexus-test-automation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "mcp:start": "npx @playwright/mcp@latest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^24.10.1",
+    "avail-nexus-sdk": "^0.0.10",
+    "ethers": "^6.16.0",
+    "sinon": "^21.0.0",
+    "typescript": "^5.9.3"
+  }
+}

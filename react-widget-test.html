@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexus React Widget Test Page</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script type="module" src="https://unpkg.com/avail-nexus-sdk@0.0.10/dist/index.umd.js"></script>
+    <script src="./mocks/web3-mock.js"></script>  <!-- Enhanced mock below -->
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+    const { createRoot } = ReactDOM;
+    const { useState } = React;
+
+    // Expose SDK for global access
+    window.NexusSDK = AvailNexusSDK.NexusSDK;
+
+    // Mock contract ABI for BridgeAndExecuteButton
+    window.mockAbi = [{"inputs":[{"name":"to","type":"address"}],"name":"transfer","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+
+    const App = () => {
+        const [providerSet, setProviderSet] = useState(false);
+
+        useState(() => {
+            // Auto-set mock provider on load
+            const sdk = new window.NexusSDK({ network: 'testnet' });
+            sdk.initialize(window.ethereum).then(() => {
+                (window.sdkInstance as any).setProvider(window.ethereum);
+                setProviderSet(true);
+            });
+        }, []);
+
+        if (!providerSet) return <div>Loading SDK...</div>;
+
+        return (
+            <AvailNexusSDK.NexusProvider config={{ network: 'testnet' }}>
+                <div style={{ padding: '20px' }}>
+                    <h2>Bridge Button</h2>
+                    <AvailNexusSDK.BridgeButton
+                        prefill={{ chainId: 80002, token: 'USDC', amount: '100' }}
+                    >
+                        {({ onClick, isLoading }) => (
+                            <button onClick={onClick} disabled={isLoading} id="bridge-btn">
+                                {isLoading ? 'Bridging...' : 'Bridge USDC'}
+                            </button>
+                        )}
+                    </AvailNexusSDK.BridgeButton>
+
+                    <h2>Transfer Button</h2>
+                    <AvailNexusSDK.TransferButton
+                        prefill={{ chainId: 80002, token: 'USDC', amount: '50', recipient: '0x742d35Cc6634C0532925a3b8D7fB6969b37D7A4e' }}
+                    >
+                        {({ onClick, isLoading }) => (
+                            <button onClick={onClick} disabled={isLoading} id="transfer-btn">
+                                {isLoading ? 'Transferring...' : 'Transfer USDC'}
+                            </button>
+                        )}
+                    </AvailNexusSDK.TransferButton>
+
+                    <h2>Bridge & Execute Button</h2>
+                    <AvailNexusSDK.BridgeAndExecuteButton
+                        contractAddress="0xA0b86a33E6418D8A2e9D3f4c4D5E6F7a8b9c0d1e"  // Mock
+                        contractAbi={window.mockAbi}
+                        functionName="transfer"
+                        buildFunctionParams={(token, amount, chainId, userAddress) => ({
+                            functionParams: [userAddress, ethers.parseEther(amount)],  // Mock params
+                            value: '0'
+                        })}
+                        prefill={{ toChainId: 80002, token: 'ETH', amount: '0.1' }}
+                    >
+                        {({ onClick, isLoading, disabled }) => (
+                            <button onClick={onClick} disabled={isLoading || disabled} id="bridge-execute-btn">
+                                {isLoading ? 'Executing...' : 'Bridge & Execute'}
+                            </button>
+                        )}
+                    </AvailNexusSDK.BridgeAndExecuteButton>
+                </div>
+            </AvailNexusSDK.NexusProvider>
+        );
+    };
+
+    createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

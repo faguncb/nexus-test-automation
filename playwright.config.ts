@@ -20,7 +20,7 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: 'npx serve . -p 3000',  // Serves test-page.html
+        command: 'npx serve . -p 3000',
         port: 3000,
         reuseExistingServer: !process.env.CI,
     },
